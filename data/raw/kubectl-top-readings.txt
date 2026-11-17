@@ -1,0 +1,39 @@
+# Measurement run: php-apache with NO CPU limit (manifests/php-apache.yaml), 2026-11-17
+# The cluster had been stopped earlier and was restarted (minikube start) before this run.
+# Pod: php-apache-bdf6ddcf8-bx4xb. Readings are manual and NOT evenly spaced in time.
+
+# Confirmation that the CPU limit is gone
+PS> kubectl get deploy php-apache -o jsonpath='{.spec.template.spec.containers[0].resources}'
+{"limits":{"memory":"128Mi"},"requests":{"cpu":"100m","memory":"64Mi"}}
+
+--- Idle baseline (new pod) ---
+PS> kubectl top nodes
+NAME       CPU(cores)   CPU(%)   MEMORY(bytes)   MEMORY(%)
+minikube   229m         1%       844Mi           10%
+PS> kubectl top pods
+NAME                         CPU(cores)   MEMORY(bytes)
+php-apache-bdf6ddcf8-bx4xb   1m           8Mi
+
+--- Idle again, just before the load generator started ---
+minikube   237m         1%       875Mi           11%
+php-apache-bdf6ddcf8-bx4xb   1m           8Mi
+
+--- Reading 1 (under load) ---
+minikube   967m         8%       874Mi           11%
+load-generator               26m          2Mi
+php-apache-bdf6ddcf8-bx4xb   788m         12Mi
+
+--- Reading 2 ---
+minikube   1215m        10%      878Mi           11%
+load-generator               25m          2Mi
+php-apache-bdf6ddcf8-bx4xb   969m         12Mi
+
+--- Reading 3 ---
+minikube   1202m        10%      863Mi           11%
+load-generator               24m          2Mi
+php-apache-bdf6ddcf8-bx4xb   971m         12Mi
+
+--- Reading 4 (steady; screenshot screenshots/06) ---
+minikube   1230m        10%      863Mi           11%
+load-generator               24m          3Mi
+php-apache-bdf6ddcf8-bx4xb   970m         12Mi

@@ -1,0 +1,45 @@
+# Sample application used in the experiment: php-apache with NO CPU limit.
+# Only a CPU *request* (100m) and a memory limit (128Mi) are set, so the pod's CPU
+# usage is set by the load rather than capped by the configuration.
+# php-apache is the standard Kubernetes example image (CPU-heavy by design):
+# every HTTP request runs a loop of square-root calculations and returns "OK!".
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-apache
+  labels:
+    app: php-apache
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: php-apache
+  template:
+    metadata:
+      labels:
+        app: php-apache
+    spec:
+      containers:
+        - name: php-apache
+          image: registry.k8s.io/hpa-example
+          ports:
+            - containerPort: 80
+          resources:
+            requests:        # what the scheduler reserves for this container
+              cpu: 100m
+              memory: 64Mi
+            limits:          # no CPU limit; memory overuse still gets the pod OOM-killed
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-apache
+  labels:
+    app: php-apache
+spec:
+  selector:
+    app: php-apache
+  ports:
+    - port: 80
+      targetPort: 80
